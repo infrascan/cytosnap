@@ -1,6 +1,6 @@
 {
-	"name": "cytosnap",
-	"version": "4.0.0",
+	"name": "@infrascan/cytosnap",
+	"version": "4.1.0",
 	"description": "Render images of Cytoscape.js graphs on the server",
 	"main": "index.js",
 	"scripts": {
@@ -29,6 +29,7 @@
 		"bluebird": "^3.4.0",
 		"browserify": "^16.2.3",
 		"cytoscape": "^3.2.19",
+		"fs-extra": "^11.1.0",
 		"handlebars": "^4.0.12"
 	},
 	"devDependencies": {

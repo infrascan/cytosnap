@@ -42,22 +42,57 @@ let getStream = function (text) {
 
 let browserSrc;
 
-let browserifyBrowserSrc = function () {
+let browserifyBrowserSrc = function (destinationDir) {
 	if (browserSrc != null) {
 		return browserSrc;
 	}
 
 	browserSrc = new Promise(function (resolve) {
 		browserify()
-			.add(path.join(__dirname, './browser/index.js'))
+			.add(path.join(destinationDir || __dirname, './browser/index.js'))
 			.bundle()
 			.on('end', resolve)
 			.pipe(
-				fs.createWriteStream(path.join(__dirname, './browser/index.pack.js'))
+				fs.createWriteStream(
+					path.join(destinationDir || __dirname, './browser/index.pack.js')
+				)
 			);
 	});
 
 	return browserSrc;
+};
+
+let ensureDestinationDirExists = function (destinationDir) {
+	if (destinationDir == null) {
+		return;
+	}
+	if (
+		!fs.existsSync(destinationDir) ||
+		!fs.existsSync(path.join(destinationDir, 'browser'))
+	) {
+		fs.mkdirSync(path.join(destinationDir, 'browser'), {
+			recursive: true,
+		});
+		return require('fs-extra').copySync(
+			'./node_modules',
+			path.join(destinationDir, 'node_modules')
+		);
+	}
+};
+
+let moveWebpage = function (destinationDir) {
+	let readWebpage = () => {
+		return readFile(path.join(__dirname, './browser/index.html'));
+	};
+
+	let writeWebpage = (contents) => {
+		return writeFile(
+			path.join(destinationDir || __dirname, './browser/index.html'),
+			contents
+		);
+	};
+
+	return Promise.try(readWebpage).then(writeWebpage);
 };
 
 let Cytosnap = function (launchPuppeteer, opts = {}) {
@@ -83,6 +118,7 @@ let Cytosnap = function (launchPuppeteer, opts = {}) {
 	this.launchPuppeteer = launchPuppeteer;
 
 	this.running = false;
+	ensureDestinationDirExists(this.options.destinationDir);
 };
 
 let extensions = [];
@@ -93,7 +129,7 @@ Cytosnap.use = function (exts) {
 
 let wroteExtensionList = false;
 
-let writeExtensionsList = function () {
+let writeExtensionsList = function (destinationDir) {
 	if (wroteExtensionList) {
 		return Promise.resolve();
 	}
@@ -102,7 +138,10 @@ let writeExtensionsList = function () {
 		readFile(path.join(__dirname, './browser/index.js.hbs'), 'utf8');
 
 	let writeJs = (contents) =>
-		writeFile(path.join(__dirname, './browser/index.js'), contents);
+		writeFile(
+			path.join(destinationDir || __dirname, './browser/index.js'),
+			contents
+		);
 
 	let fillTemplate = (template) => {
 		return Handlebars.compile(template)({ extensions });
@@ -170,10 +209,17 @@ proto.shot = function (opts, next) {
 	}
 
 	return Promise.try(function () {
-		return writeExtensionsList();
+		return writeExtensionsList(snap.options.destinationDir);
 	})
 		.then(function () {
-			return browserifyBrowserSrc();
+			return browserifyBrowserSrc(snap.options.destinationDir);
+		})
+		.then(function () {
+			if (snap.options.destinationDir) {
+				return moveWebpage(snap.options.destinationDir);
+			} else {
+				return true;
+			}
 		})
 		.then(function () {
 			return snap.browser.newPage();
@@ -192,9 +238,16 @@ proto.shot = function (opts, next) {
 					return uri;
 				}
 			};
-
 			return page.goto(
-				'file://' + patchUri(path.join(__dirname, './browser/index.html'))
+				'file://' +
+					patchUri(
+						path.join(
+							snap.options.destinationDir
+								? path.resolve(snap.options.destinationDir)
+								: __dirname,
+							'./browser/index.html'
+						)
+					)
 			);
 		})
 		.then(function () {
@@ -229,6 +282,14 @@ proto.shot = function (opts, next) {
 			return page.evaluate(js);
 		})
 		.then(function () {
+			if (opts.sleep == null) {
+				return Promise.resolve();
+			}
+
+			let js = 'window._sleep = ' + opts.sleep;
+			return page.evaluate(js);
+		})
+		.then(function () {
 			return page.evaluate(function () {
 				/* global window, options, cy, layoutFunction, styleFunction */
 				if (window.layoutFunction) {
@@ -246,6 +307,14 @@ proto.shot = function (opts, next) {
 				let layoutDone = cy.promiseOn('layoutstop');
 
 				cy.makeLayout(options.layout).run(); // n.b. makeLayout used in case cytoscape@2 support is desired
+
+				if (window._sleep != null) {
+					return layoutDone.then(() => {
+						return new Promise((resolve) =>
+							setTimeout(resolve, Number(window._sleep))
+						);
+					});
+				}
 
 				return layoutDone;
 			});

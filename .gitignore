@@ -5,3 +5,5 @@ test/img.*
 test/out.*
 test/*.png
 test/*.jpg
+custom-dest
+.npmrc
