@@ -1,6 +1,6 @@
 {
 	"name": "@infrascan/cytosnap",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Render images of Cytoscape.js graphs on the server",
 	"main": "index.js",
 	"scripts": {

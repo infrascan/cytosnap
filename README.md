@@ -1,6 +1,6 @@
 # @infrascan/cytosnap
 
-This is a fork of [the original cytosnap package](https://github.com/cytoscape/cytosnap). This fork is designed to make it easier to run cytosnap in a lambda by decoupling it from puppeteer, allowing an instance of [chrome-aws-lambda](https://github.com/alixaxel/chrome-aws-lambda) to be passed in.
+This is a fork of [the original cytosnap package](https://github.com/cytoscape/cytosnap). This fork is designed to make it easier to run cytosnap in a lambda by decoupling it from puppeteer, allowing an instance of [chrome-aws-lambda](https://github.com/alixaxel/chrome-aws-lambda) or [@sparticuz/chromium](https://github.com/sparticuz/chromium) to be passed in.
 
 If you do not require a custom puppeteer instance, you should use [cytosnap](https://github.com/cytoscape/cytosnap).
 

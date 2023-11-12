@@ -205,7 +205,8 @@ proto.shot = function (opts, next) {
 	if (opts.format === 'jpg') {
 		opts.format = 'jpeg';
 	} else if (opts.format === 'png') {
-		opts.quality = 0; // most compression
+		// png screenshots do not support a quality argument
+		delete opts.quality;
 	}
 
 	return Promise.try(function () {
