@@ -1,6 +1,8 @@
-# Cytosnap
+# @infrascan/cytosnap
 
-[![Join the chat at https://gitter.im/cytoscape/cytosnap](https://badges.gitter.im/cytoscape/cytosnap.svg)](https://gitter.im/cytoscape/cytosnap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/cytoscape/cytosnap.svg?branch=master)](https://travis-ci.org/cytoscape/cytosnap)
+This is a fork of [the original cytosnap package](https://github.com/cytoscape/cytosnap). This fork is designed to make it easier to run cytosnap in a lambda by decoupling it from puppeteer, allowing an instance of [chrome-aws-lambda](https://github.com/alixaxel/chrome-aws-lambda) to be passed in.
+
+If you do not require a custom puppeteer instance, you should use [cytosnap](https://github.com/cytoscape/cytosnap).
 
 Render graphs on the server side with [Cytoscape.js](http://js.cytoscape.org), getting image files as output.  This package uses [Puppeteer](https://pptr.dev) to generate the output.  Refer to the [Puppeteer documentation](https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#troubleshooting) to ensure that your machine is configured properly to run Chrome headlessly.
 
@@ -18,12 +20,13 @@ Quick start example:
 
 ```js
 var cytosnap = require('cytosnap');
+var chromium = require('chrome-aws-lambda');
 
 // list of layout extensions to use
 // NB you must `npm install` these yourself for your project
 cytosnap.use([ 'cytoscape-dagre', 'cytoscape-cose-bilkent' ]);
 
-var snap = cytosnap();
+var snap = cytosnap(() => chromium.puppeteer.launch());
 
 snap.start().then(function(){
   return snap.shot({

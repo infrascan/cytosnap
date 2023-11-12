@@ -1,6 +1,6 @@
 {
 	"name": "@infrascan/cytosnap",
-	"version": "4.1.0",
+	"version": "0.1.0",
 	"description": "Render images of Cytoscape.js graphs on the server",
 	"main": "index.js",
 	"scripts": {
@@ -8,7 +8,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/cytoscape/cytosnap.git"
+		"url": "git+https://github.com/infrascan/cytosnap.git"
 	},
 	"keywords": [
 		"cytoscape",
@@ -18,12 +18,12 @@
 		"export",
 		"server"
 	],
-	"author": "Max Franz",
+	"author": "Max Franz, Liam Farrelly",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/cytoscape/cytosnap/issues"
+		"url": "https://github.com/infrascan/cytosnap/issues"
 	},
-	"homepage": "https://github.com/cytoscape/cytosnap#readme",
+	"homepage": "https://github.com/infrascan/cytosnap#readme",
 	"dependencies": {
 		"base64-stream": "^0.1.3",
 		"bluebird": "^3.4.0",
